@@ -2,3 +2,4 @@ llama-index
 openai
 python-dotenv
 streamlit
+request
