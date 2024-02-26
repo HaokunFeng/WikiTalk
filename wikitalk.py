@@ -10,11 +10,11 @@ from llama_index import(
     SimpleDirectoryReader,
     ServiceContext,
 )
-from llama_index.tools import QueryEngineTool, ToolMetadata
+from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.llms import OpenAI
 from llama_index.agent import OpenAIAgent
 from llama_index import load_index_from_storage, StorageContext
-from llama_index.node_parser import SentenceSplitter
+from llama_index.core.node_parser import SentenceSplitter
 from dotenv import load_dotenv
 
 
