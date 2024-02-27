@@ -12,7 +12,7 @@ from llama_index import(
 )
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.llms import OpenAI
-from llama_index.agent import OpenAIAgent
+from llama_index.agent import OpenAIAgent, FnRetrieverOpenAIAgent
 from llama_index import load_index_from_storage, StorageContext
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
@@ -160,4 +160,24 @@ for wiki_title in wiki_titles:
 
 
 # define an "object" index and retriever over these tools
+tool_mapping = SimpleToolNodeMapping.from_objects(all_tools)
+obj_index = ObjectIndex.from_objects(
+    all_tools,
+    tool_mapping,
+    VectorStoreIndex,
+)
+
+
+
+top_agent = FnRetrieverOpenAIAgent.from_retriever(
+    obj_index.as_retriever(similarity_top_k=3),
+    system_prompt="""\
+    You are a specialist in answering queries about the European top football leagues.
+    Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
+    verbose=True,
+)
+
+
+response = top_agent.query("Tell me about the history and UCL performance of La Liga.")
+
 
