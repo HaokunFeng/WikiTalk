@@ -4,16 +4,18 @@ import streamlit as st
 from pathlib import Path
 import requests
 
-from llama_index import(
+from llama_index.core import(
     VectorStoreIndex,
     SummaryIndex,
     SimpleDirectoryReader,
     ServiceContext,
+    StorageContext,
 )
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
-from llama_index.llms import OpenAI
-from llama_index.agent import OpenAIAgent, FnRetrieverOpenAIAgent
-from llama_index import load_index_from_storage, StorageContext
+from llama_index.llms.openai import OpenAI
+from llama_index.agent.openai import OpenAIAgent
+from llama_index.agent.openai_legacy import FnRetrieverOpenAIAgent
+from llama_index.core import load_index_from_storage
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from dotenv import load_dotenv
@@ -179,5 +181,5 @@ top_agent = FnRetrieverOpenAIAgent.from_retriever(
 
 
 response = top_agent.query("Tell me about the history and UCL performance of La Liga.")
-
+print(response)
 
