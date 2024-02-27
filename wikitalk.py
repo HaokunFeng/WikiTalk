@@ -15,6 +15,7 @@ from llama_index.llms import OpenAI
 from llama_index.agent import OpenAIAgent
 from llama_index import load_index_from_storage, StorageContext
 from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from dotenv import load_dotenv
 
 
@@ -90,3 +91,73 @@ for idx, wiki_title in enumerate(wiki_titles):
             StorageContext.from_defaults(persist_dir=f"./data/{wiki_title}"),
             service_context=service_context,
         )
+    
+    # build summary index
+    summary_index = SummaryIndex(
+        nodes,
+        service_context=service_context,
+    )
+    # define query engine
+    vector_query_engine = vector_index.as_query_engine()
+    summary_query_engine = summary_index.as_query_engine()
+
+    # define tools
+    query_engine_tools = [
+        QueryEngineTool(
+            query_engine=vector_query_engine,
+            metdata=ToolMetadata(
+                name="vector_tool",
+                description=(
+                    "Useful for questions related to specific aspects of"
+                    f" {wiki_title} (e.g. the history, teams and performance in EU, or more)."
+                ),
+            ),
+        ),
+        QueryEngineTool(
+            query_engine=summary_query_engine,
+            metdata=ToolMetadata(
+                name="summary_tool",
+                description=(
+                    "Useful for any requests that require a holistic summary"
+                    f" of EVERYTHING about {wiki_title}. For questions about more specific sections, please use the vertor_tool."
+                ),
+            ),
+        ),
+    ]
+
+    # define agents
+    function_llm = OpenAI(model="gpt-4")
+    agent = OpenAIAgent.from_tools(
+        query_engine_tools,
+        llm=function_llm,
+        verbose=True,
+        system_prompt=f"""\
+        Your are a specialist in answering questions about {wiki_title}.
+        You must ALWAYS use at least one of the tools provided when answering a question; DO NOT RELY ON PRIOR KNOWLEDGE.\
+        """,
+    )
+    agents[wiki_title] = agent
+    query_engines[wiki_title] = vector_index.as_query_engine(
+        similarity_top_k=2
+    )
+
+
+# define tool for each document agent
+all_tools = []
+for wiki_title in wiki_titles:
+    wiki_summary = (
+        f"This content contains Wikipedia artiles about {wiki_title}. Use"
+        f" this tool if you want to answer any questions about {wiki_title}.\n"
+    )
+    doc_tool = QueryEngineTool(
+        query_engine=agents[wiki_title],
+        metadata=ToolMetadata(
+            name=f"tool_{wiki_title.replace(' ', '_')}",
+            description=wiki_summary,
+        ),
+    )
+    all_tools.append(doc_tool)
+
+
+# define an "object" index and retriever over these tools
+
