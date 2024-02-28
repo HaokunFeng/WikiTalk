@@ -27,7 +27,6 @@ llm = OpenAI(
     temperature=0.0,
     menu_items=None,
 )
-#service_context = ServiceContext.from_defaults(llm=llm)
 Settings.llm = llm
 
 
@@ -182,6 +181,6 @@ top_agent = FnRetrieverOpenAIAgent.from_retriever(
 )
 
 
-response = top_agent.query("Tell me about the history and UCL performance of La Liga.")
+response = top_agent.query("Please compare Premier League and La Liga in terms of history and UCL performance.")
 print(response)
 
