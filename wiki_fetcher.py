@@ -1,7 +1,7 @@
 import requests
 from pathlib import Path
 
-
+# function to fetch wikipedia articles and saves them to a local data folder
 def get_wikipeida_articles(wiki_titles):
     for title in wiki_titles:
         response = requests.get(

@@ -9,12 +9,13 @@ from llama_index.core import(
     SummaryIndex,
     SimpleDirectoryReader,
     StorageContext,
+    load_index_from_storage,
+    Settings,
 )
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.llms.openai import OpenAI
 from llama_index.agent.openai import OpenAIAgent
 from llama_index.agent.openai_legacy import FnRetrieverOpenAIAgent
-from llama_index.core import load_index_from_storage, Settings
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from dotenv import load_dotenv
@@ -76,6 +77,8 @@ node_parser = SentenceSplitter()
 agents = {}
 query_engines = {}
 all_nodes = []
+
+
 
 for idx, wiki_title in enumerate(wiki_titles):
     nodes = node_parser.get_nodes_from_documents(leagues_docs[wiki_title])
