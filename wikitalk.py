@@ -19,6 +19,8 @@ from llama_index.agent.openai_legacy import FnRetrieverOpenAIAgent
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from dotenv import load_dotenv
+from wiki_fetcher import get_wikipeida_articles
+from vector_agent_builder import build_indices, create_tools
 
 
 load_dotenv()
@@ -30,139 +32,29 @@ llm = OpenAI(
 )
 Settings.llm = llm
 
+# define wikipedia titles
+wiki_titles = []
 
-wiki_titles = [
-    "Serie A",
-    "Premier League",
-    "Bundesliga",
-    "La Liga",
-    "Ligue 1"
-]
-
-
-
-for title in wiki_titles:
-    response = requests.get(
-        "https://en.wikipedia.org/w/api.php",
-        params={
-            "action": "query",
-            "format": "json",
-            "titles": title,
-            "prop": "extracts",
-            "explaintext": True,
-        },
-    ).json()
-    page = next(iter(response["query"]["pages"].values()))
-    wiki_text = page["extract"]
-
-    data_path = Path("data")
-    if not data_path.exists():
-        Path.mkdir(data_path)
-    
-    with open(data_path / f"{title}.txt", "w", encoding="utf-8") as fp:
-        fp.write(wiki_text)
-
+# fetch wikipedia articles and build indices
+get_wikipeida_articles(wiki_titles)
 
 leagues_docs = {}
+node_parser = SentenceSplitter()
+
+# load data for each wiki title
 for wiki_title in wiki_titles:
     leagues_docs[wiki_title] = SimpleDirectoryReader(
         input_files=[f"data/{wiki_title}.txt"]
     ).load_data()
 
-
-
-node_parser = SentenceSplitter()
-
-#Build agents dictionary
+# build agents, query engines, and indices
 agents = {}
 query_engines = {}
 all_nodes = []
+build_indices(wiki_titles, node_parser, agents, query_engines)
 
-
-
-for idx, wiki_title in enumerate(wiki_titles):
-    nodes = node_parser.get_nodes_from_documents(leagues_docs[wiki_title])
-    all_nodes.extend(nodes)
-
-    if not os.path.exists(f"./data/{wiki_title}"):
-        #build vector index
-        vector_index = VectorStoreIndex(nodes)
-        vector_index.storage_context.persist(
-            persist_dir=f"./data/{wiki_title}"
-        )
-    else:
-        vector_index = load_index_from_storage(
-            StorageContext.from_defaults(persist_dir=f"./data/{wiki_title}"),
-        )
-    
-    # build summary index
-    summary_index = SummaryIndex(nodes)
-    # define query engine
-    vector_query_engine = vector_index.as_query_engine()
-    summary_query_engine = summary_index.as_query_engine()
-
-    # define tools
-    query_engine_tools = [
-        QueryEngineTool(
-            query_engine=vector_query_engine,
-            metadata=ToolMetadata(
-                name="vector_tool",
-                description=(
-                    "Useful for questions related to specific aspects of"
-                    f" {wiki_title} (e.g. the history, teams and performance in EU, or more)."
-                ),
-            ),
-        ),
-        QueryEngineTool(
-            query_engine=summary_query_engine,
-            metadata=ToolMetadata(
-                name="summary_tool",
-                description=(
-                    "Useful for any requests that require a holistic summary"
-                    f" of EVERYTHING about {wiki_title}. For questions about more specific sections, please use the vertor_tool."
-                ),
-            ),
-        ),
-    ]
-
-    # define agents
-    function_llm = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-3.5-turbo",
-        temperature=0.0,
-        menu_items=None,
-    )
-    agent = OpenAIAgent.from_tools(
-        query_engine_tools,
-        llm=function_llm,
-        verbose=True,
-        system_prompt=f"""\
-        Your are a specialist in answering questions about {wiki_title}.
-        You must ALWAYS use at least one of the tools provided when answering a question; DO NOT RELY ON PRIOR KNOWLEDGE.\
-        """,
-    )
-    agents[wiki_title] = agent
-    query_engines[wiki_title] = vector_index.as_query_engine(
-        similarity_top_k=2
-    )
-
-
-# define tool for each document agent
-all_tools = []
-for wiki_title in wiki_titles:
-    wiki_summary = (
-        f"This content contains Wikipedia artiles about {wiki_title}. Use"
-        f" this tool if you want to answer any questions about {wiki_title}.\n"
-    )
-    doc_tool = QueryEngineTool(
-        query_engine=agents[wiki_title],
-        metadata=ToolMetadata(
-            name=f"tool_{wiki_title.replace(' ', '_')}",
-            description=wiki_summary,
-        ),
-    )
-    all_tools.append(doc_tool)
-
+# create tools
+all_tools = create_tools(wiki_titles, agents)
 
 # define an "object" index and retriever over these tools
 tool_mapping = SimpleToolNodeMapping.from_objects(all_tools)
@@ -172,8 +64,7 @@ obj_index = ObjectIndex.from_objects(
     VectorStoreIndex,
 )
 
-
-
+# define an agent that uses the object index
 top_agent = FnRetrieverOpenAIAgent.from_retriever(
     obj_index.as_retriever(similarity_top_k=3),
     system_prompt="""\
@@ -183,6 +74,61 @@ top_agent = FnRetrieverOpenAIAgent.from_retriever(
 )
 
 
-response = top_agent.query("Please compare Premier League and La Liga in terms of history and UCL performance.")
-print(response)
+# streamlit app
+#st.title("WikiTalk")
+#st.sidebar.image("path/logo.png", use_container_width=True)
+
+
+
+# sidebar
+st.sidebar.title("WikiTalk")
+search_term = st.sidebar.text_input("Search Wikipedia", "")
+if st.sidebar.button("Chat"):
+    st.subheader("Chat with WikiTalk")
+    # set a default model
+    if "openai_model" not in st.session_state:
+        st.session_state.openai_model = "gpt-3.5-turbo"
+
+    # initialize chat history
+    if "messages" not in st.session_state.keys():
+        st.session_state.messages = [
+            {"role": "assistant", "content": "Welcome to WikiTalk! Ask me anything you want to learn!"}
+        ]
+
+    # display chat messages from history on app run
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # accept user input
+    if prompt := st.chat_input("What's your question?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = top_agent.query(prompt)
+                st.write_stream(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+    
+
+
+
+
+if st.sidebar.button("Your Knowledge Base"):
+    st.subheader("Your Knowledge Base")
+    for wiki_title in wiki_titles:
+        st.write(f"### {wiki_title}")
+        st.text(leagues_docs[wiki_title])
+
+
+# hide streamlit menu
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 

@@ -1,39 +1,32 @@
+# vector_agent_builder.py
 import os
+from pathlib import Path
 from llama_index.core import (
     VectorStoreIndex,
     SummaryIndex,
+    SimpleDirectoryReader,
     StorageContext,
-    load_index_from_storage,
-    Settings,
 )
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.llms.openai import OpenAI
 from llama_index.agent.openai import OpenAIAgent
+from llama_index.core import load_index_from_storage, Settings
 from llama_index.core.node_parser import SentenceSplitter
-from llama_index.core.readers import SimpleDirectoryReader
+from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
+from dotenv import load_dotenv
 
-agents = {}
-query_engines = {}
-all_nodes = []
-wiki_titles = []
 
-leagues_docs = {}
-for wiki_title in wiki_titles:
-    leagues_docs[wiki_title] = SimpleDirectoryReader(
-        input_files=[f"data/{wiki_title}.txt"]
-    ).load_data()
-
-node_parser = SentenceSplitter()
-
+load_dotenv()
 
 # function to build vector and summary indices
-def build_indices(wiki_titles):
+def build_indices(wiki_titles, node_parser, agents, query_engines):
+    all_nodes = []
     for idx, wiki_title in enumerate(wiki_titles):
         nodes = node_parser.get_nodes_from_documents(leagues_docs[wiki_title])
         all_nodes.extend(nodes)
 
         if not os.path.exists(f"./data/{wiki_title}"):
-            #build vector index
+            # build vector index
             vector_index = VectorStoreIndex(nodes)
             vector_index.storage_context.persist(
                 persist_dir=f"./data/{wiki_title}"
@@ -57,7 +50,7 @@ def build_indices(wiki_titles):
                     name="vector_tool",
                     description=(
                         "Useful for questions related to specific aspects of"
-                        f" {wiki_title} (e.g. the history, teams and performance in EU, or more)."
+                        f" {wiki_title} (e.g. the history, teams, and performance in EU, or more)."
                     ),
                 ),
             ),
@@ -67,7 +60,7 @@ def build_indices(wiki_titles):
                     name="summary_tool",
                     description=(
                         "Useful for any requests that require a holistic summary"
-                        f" of EVERYTHING about {wiki_title}. For questions about more specific sections, please use the vertor_tool."
+                        f" of EVERYTHING about {wiki_title}. For questions about more specific sections, please use the vector_tool."
                     ),
                 ),
             ),
@@ -94,9 +87,8 @@ def build_indices(wiki_titles):
             similarity_top_k=2
         )
 
-
 # function to create a tool for each document agent
-def create_tools(wiki_titles):
+def create_tools(wiki_titles, agents):
     all_tools = []
     for wiki_title in wiki_titles:
         wiki_summary = (
