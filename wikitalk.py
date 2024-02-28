@@ -39,6 +39,7 @@ wiki_titles = [
 ]
 
 
+
 for title in wiki_titles:
     response = requests.get(
         "https://en.wikipedia.org/w/api.php",
@@ -92,9 +93,7 @@ for idx, wiki_title in enumerate(wiki_titles):
         )
     
     # build summary index
-    summary_index = SummaryIndex(
-        nodes
-    )
+    summary_index = SummaryIndex(nodes)
     # define query engine
     vector_query_engine = vector_index.as_query_engine()
     summary_query_engine = summary_index.as_query_engine()
@@ -175,7 +174,7 @@ obj_index = ObjectIndex.from_objects(
 top_agent = FnRetrieverOpenAIAgent.from_retriever(
     obj_index.as_retriever(similarity_top_k=3),
     system_prompt="""\
-    You are a specialist in answering queries about the European top football leagues.
+    You are an agent designed to answer queries about the European top football leagues.
     Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
     verbose=True,
 )
