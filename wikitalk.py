@@ -8,14 +8,13 @@ from llama_index.core import(
     VectorStoreIndex,
     SummaryIndex,
     SimpleDirectoryReader,
-    ServiceContext,
     StorageContext,
 )
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.llms.openai import OpenAI
 from llama_index.agent.openai import OpenAIAgent
 from llama_index.agent.openai_legacy import FnRetrieverOpenAIAgent
-from llama_index.core import load_index_from_storage
+from llama_index.core import load_index_from_storage, Settings
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
 from dotenv import load_dotenv
@@ -24,12 +23,12 @@ from dotenv import load_dotenv
 load_dotenv()
 llm = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OEPNAI_API_BASE"),
     model="gpt-3.5-turbo",
     temperature=0.0,
     menu_items=None,
 )
-service_context = ServiceContext.from_defaults(llm=llm)
+#service_context = ServiceContext.from_defaults(llm=llm)
+Settings.llm = llm
 
 
 wiki_titles = [
@@ -59,7 +58,7 @@ for title in wiki_titles:
     if not data_path.exists():
         Path.mkdir(data_path)
     
-    with open(data_path / f"{title}.txt", "w") as fp:
+    with open(data_path / f"{title}.txt", "w", encoding="utf-8") as fp:
         fp.write(wiki_text)
 
 
@@ -84,20 +83,18 @@ for idx, wiki_title in enumerate(wiki_titles):
 
     if not os.path.exists(f"./data/{wiki_title}"):
         #build vector index
-        vector_index = VectorStoreIndex(nodes, service_context=service_context)
+        vector_index = VectorStoreIndex(nodes)
         vector_index.storage_context.persist(
             persist_dir=f"./data/{wiki_title}"
         )
     else:
         vector_index = load_index_from_storage(
             StorageContext.from_defaults(persist_dir=f"./data/{wiki_title}"),
-            service_context=service_context,
         )
     
     # build summary index
     summary_index = SummaryIndex(
-        nodes,
-        service_context=service_context,
+        nodes
     )
     # define query engine
     vector_query_engine = vector_index.as_query_engine()
@@ -107,7 +104,7 @@ for idx, wiki_title in enumerate(wiki_titles):
     query_engine_tools = [
         QueryEngineTool(
             query_engine=vector_query_engine,
-            metdata=ToolMetadata(
+            metadata=ToolMetadata(
                 name="vector_tool",
                 description=(
                     "Useful for questions related to specific aspects of"
@@ -117,7 +114,7 @@ for idx, wiki_title in enumerate(wiki_titles):
         ),
         QueryEngineTool(
             query_engine=summary_query_engine,
-            metdata=ToolMetadata(
+            metadata=ToolMetadata(
                 name="summary_tool",
                 description=(
                     "Useful for any requests that require a holistic summary"
@@ -128,7 +125,12 @@ for idx, wiki_title in enumerate(wiki_titles):
     ]
 
     # define agents
-    function_llm = OpenAI(model="gpt-4")
+    function_llm = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model="gpt-3.5-turbo",
+        temperature=0.0,
+        menu_items=None,
+    )
     agent = OpenAIAgent.from_tools(
         query_engine_tools,
         llm=function_llm,
