@@ -11,12 +11,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 st.set_page_config(
-    page_title="Resume AI",
-    page_icon="👋",
+    page_title="Chat with File",
+    page_icon="📂",
     layout="centered",
     initial_sidebar_state="auto",
     menu_items=None,
 )
+st.title("📂 Chat with File")
+st.markdown("---")
 
 # set api key and model
 llm = OpenAI(
