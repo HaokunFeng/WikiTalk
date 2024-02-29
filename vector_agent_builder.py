@@ -1,5 +1,6 @@
 # vector_agent_builder.py
 import os
+import streamlit as st
 from pathlib import Path
 from llama_index.core import (
     VectorStoreIndex,
@@ -17,6 +18,21 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
+leagues_docs = {}
+
+# initialize wiki_titles
+if "wiki_titles" not in st.session_state:
+    st.session_state.wiki_state = {
+        "wiki_titles": [file_name[:-4] for file_name in os.listdir("data") if file_name.endswith(".txt")],
+    }
+# access and modify wiki_titles
+wiki_titles = st.session_state.wiki_state["wiki_titles"]
+
+# load data for each wiki title
+for wiki_title in wiki_titles:
+    leagues_docs[wiki_title] = SimpleDirectoryReader(
+        input_files=[f"data/{wiki_title}.txt"]
+    ).load_data()
 
 # function to build vector and summary indices
 def build_indices(wiki_titles, node_parser, agents, query_engines):

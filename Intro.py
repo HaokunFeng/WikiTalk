@@ -1,5 +1,4 @@
 import streamlit as st
-#import app_component as ac 
 
 
 # st.title("Welcome to WikiTalk")
@@ -15,7 +14,6 @@ st.set_page_config(
 )
 
 
-#ac.render_cta()
 
 # copies 
 home_title = "GPT Lab"
@@ -35,7 +33,6 @@ st.markdown("#### Greetings")
 st.write(home_introduction)
 
 st.markdown("---")
-#ac.robo_avatar_component()
 
 st.markdown("#### Privacy")
 st.write(home_privacy)
@@ -44,4 +41,5 @@ st.markdown("""\n""")
 st.markdown("""\n""")
 
 st.markdown("---")
+
 st.markdown("#### Get Started")
