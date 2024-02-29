@@ -65,13 +65,13 @@ obj_index = ObjectIndex.from_objects(
 )
 
 # define an agent that uses the object index
-# top_agent = FnRetrieverOpenAIAgent.from_retriever(
-#     obj_index.as_retriever(similarity_top_k=3),
-#     system_prompt="""\
-#     You are an agent designed to answer queries about any detailed knowledge on wikipedia.
-#     Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
-#     verbose=True,
-# )
+top_agent = FnRetrieverOpenAIAgent.from_retriever(
+    obj_index.as_retriever(similarity_top_k=3),
+    system_prompt="""\
+    You are an agent designed to answer queries about any detailed knowledge on wikipedia.
+    Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
+    verbose=True,
+)
 
 
 # streamlit app
@@ -112,19 +112,9 @@ if selected_page == "Chat":
                 response_text = str(response)
                 st.markdown(response_text)
         st.session_state.messages.append({"role": "assistant", "content": response_text})
-    
-
-elif selected_page == "Your Knowledge Base":
-    st.subheader("Your Knowledge Base")
-    for wiki_title in wiki_titles:
-        st.write(f"### {wiki_title}")
-        st.text(leagues_docs[wiki_title])
 
 
 
-# st.page_link("intro.py", label="Home", icon="🏠")
-# st.page_link("wikitalk/chat.py", label="WikiTalk", icon="🤖")
-# st.page_link("wikitalk/knowledge_base.py", label="Knowledge Base", icon="📚")
 
 
 
