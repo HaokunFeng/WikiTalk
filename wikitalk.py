@@ -65,13 +65,13 @@ obj_index = ObjectIndex.from_objects(
 )
 
 # define an agent that uses the object index
-top_agent = FnRetrieverOpenAIAgent.from_retriever(
-    obj_index.as_retriever(similarity_top_k=3),
-    system_prompt="""\
-    You are an agent designed to answer queries about the European top football leagues.
-    Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
-    verbose=True,
-)
+# top_agent = FnRetrieverOpenAIAgent.from_retriever(
+#     obj_index.as_retriever(similarity_top_k=3),
+#     system_prompt="""\
+#     You are an agent designed to answer queries about any detailed knowledge on wikipedia.
+#     Please always use the tools provided to answer a question. Do not rely on prior knowledge.""",
+#     verbose=True,
+# )
 
 
 # streamlit app
@@ -82,9 +82,10 @@ top_agent = FnRetrieverOpenAIAgent.from_retriever(
 
 # sidebar
 st.sidebar.title("WikiTalk")
-search_term = st.sidebar.text_input("Search Wikipedia", "")
-if st.sidebar.button("Chat"):
-    st.subheader("Chat with WikiTalk")
+selected_page = st.sidebar.radio("Select Page", ["Chat", "Your Knowledge Base"])
+#search_term = st.sidebar.text_input("Search Wikipedia", "")
+if selected_page == "Chat":
+    st.subheader("💬 Chat with WikiTalk")
     # set a default model
     if "openai_model" not in st.session_state:
         st.session_state.openai_model = "gpt-3.5-turbo"
@@ -100,7 +101,7 @@ if st.sidebar.button("Chat"):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # accept user input
+# accept user input
     if prompt := st.chat_input("What's your question?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -108,18 +109,23 @@ if st.sidebar.button("Chat"):
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 response = top_agent.query(prompt)
-                st.write_stream(response)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+                response_text = str(response)
+                st.markdown(response_text)
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
     
 
-
-
-
-if st.sidebar.button("Your Knowledge Base"):
+elif selected_page == "Your Knowledge Base":
     st.subheader("Your Knowledge Base")
     for wiki_title in wiki_titles:
         st.write(f"### {wiki_title}")
         st.text(leagues_docs[wiki_title])
+
+
+
+# st.page_link("intro.py", label="Home", icon="🏠")
+# st.page_link("wikitalk/chat.py", label="WikiTalk", icon="🤖")
+# st.page_link("wikitalk/knowledge_base.py", label="Knowledge Base", icon="📚")
+
 
 
 # hide streamlit menu
