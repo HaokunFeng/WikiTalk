@@ -17,6 +17,7 @@ st.set_page_config(
     menu_items=None,
 )
 st.title("✳️ ChatGPT-like clone")
+st.caption("Chat with the chatGPT-3.5 directly here. This chatbot does not use the knowledge base data, so it may not be accurate. But it's fast!")
 st.markdown("---")
 
 client = OpenAI(
