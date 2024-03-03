@@ -11,7 +11,7 @@ As we know, chatGPT sometimes gives wrong answers based on users' questions, bec
 Our system uses the power of GPT-3.5-Turbo and real_time Wikipedia to provide you with the most accurate and up-to-date information available. Whether you're looking for information on a specific topic, or just want to learn something new, WikiTalk is here to help. So go ahead, ask us anything!
 
 ## Demo App 👏
-[**WikiTalk**](wikitalk.azurewebsites.net)
+[**WikiTalk**](https://wikitalk.azurewebsites.net)
 
 ## Features of the App 🎯
 - **WikiTalk**:  You can ask questions and get accurate information based on Wikipedia here. Before using this function, you need to add the related data using 'Knowledge Base' function, otherwise you will get the feedback from chatGPT-3.5 directly that might be wrong. And it might take 1-2minutes to get the feedback because it will search all the relevant information in your knowledge base.
