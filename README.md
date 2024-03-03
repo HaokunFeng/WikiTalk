@@ -1,6 +1,14 @@
 # 🚩 WikiTalk
 
-Welcome to WikiTalk, where the power of OpenAI's GPT technology is at your fingertips. With WikiTalk, you can ask questions and get accurate information based on Wikipedia. Our system uses the power of GPT-3.5-Turbo and real_time Wikipedia to provide you with the most accurate and up-to-date information available. Whether you're looking for information on a specific topic, or just want to learn something new, WikiTalk is here to help. So go ahead, ask us anything!
+Build your own knowledge base and get accurate information using WikiTalk!
+
+## App Overview 🔍
+
+Welcome to WikiTalk, where the power of OpenAI's GPT technology is at your fingertips. With WikiTalk, you can ask questions and get accurate information based on Wikipedia. 
+
+As we know, chatGPT sometimes give wrong answers based on users' questions, because GPT-3.5's last knowledge update is in January 2022, which means it can't provide real-time information.
+
+Our system uses the power of GPT-3.5-Turbo and real_time Wikipedia to provide you with the most accurate and up-to-date information available. Whether you're looking for information on a specific topic, or just want to learn something new, WikiTalk is here to help. So go ahead, ask us anything!
 
 ## Demo App 👏
 [**WikiTalk**](https://github.com/HaokunFeng/wikitalk.git)
@@ -32,6 +40,10 @@ You can get your own OpenAI API key by following the following instructions:
 1. Go to https://platform.openai.com/account/api-keys.
 2. Click on the `+ Create new secret key` button.
 3. Next, enter an identifier name (optional) and click on the `Create secret key` button.
+
+
+# Technologies Usesd 🤖
+Llama-Index, Streamlit, OpenAI API, WikiPedia API
 
 
 ## Privacy 📂
