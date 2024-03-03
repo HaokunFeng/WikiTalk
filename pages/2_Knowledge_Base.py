@@ -19,8 +19,9 @@ if "wiki_titles" not in st.session_state:
     }
 # Access and modify wiki_titles
 wiki_titles = st.session_state.wiki_state["wiki_titles"]
-st.sidebar.title("👇 Current knowledge base")
+st.sidebar.title("Current knowledge base")
 st.sidebar.caption("Here you can check the knowledge base you are using.")
+st.sidebar.title("👇")
 st.sidebar.markdown("\n".join(f"- {title}" for title in wiki_titles))
 
 
