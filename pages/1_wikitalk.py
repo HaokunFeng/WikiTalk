@@ -33,6 +33,7 @@ st.set_page_config(
     menu_items=None,
 )
 st.title("💬 Chat with WikiTalk")
+st.caption("Ask me anything you want to learn! I will give you accurate information based on Wikipedia.")
 st.markdown("---")
 
 llm = OpenAI(
