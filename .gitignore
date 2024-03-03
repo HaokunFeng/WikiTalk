@@ -4,3 +4,4 @@ venv
 .env.apikey
 __pycache__
 #data
+video
