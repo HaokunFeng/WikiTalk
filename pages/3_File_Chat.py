@@ -24,7 +24,7 @@ st.markdown("---")
 # set api key and model
 llm = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_API_BASE"),
+    #base_url=os.getenv("OPENAI_API_BASE"),
     model="gpt-3.5-turbo",
     temperature=0.0,
     system_prompt="You are an excellent writer on the content of resume, provide detailed advice and feedback to optimize the resume. Use the uploaded document to support your answers.",
