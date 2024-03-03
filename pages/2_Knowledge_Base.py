@@ -50,19 +50,29 @@ def display_file_content(file_name):
         content = file.read()
     st.markdown(content)
 
+def download_file(file_name):
+    file_path = f"data/{file_name}"
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = file.read()
+    st.download_button(label="Download", data=content, key=f"download_{file_name}")
+
 # Streamlit app
 st.title("📚 Knowledge Base")
-st.caption("📚 This is your knowledge base data." )
+st.caption("📚 Build your own library here using Knowledge Base function!" )
 
 st.markdown("---")
 
 st.subheader("❓ How to use this knowledge base?")
 st.markdown('''
-    🚀 You can check all of the information by clicking read.
             
-    🚀 If you want to add new data to your knowledge base, type the name of the data and click add.
             
-    🚀 If you want to delete any of the data, click delete.
+    - **Add data**: If you want to add new data to your knowledge base, type the exact name of the wikipedia articles in '🔍 Search Bar' and click Add. (**NOTICE: If the name you added is wrong or not the exact name of wikipedia articles, it will build a blank file which is useless. You can check it using Read in '🔀 Repository'**)
+            
+    - **Read**: You can check all of the articles you added by clicking Read in '🔀 Repository'. If you found the article is blank, just delete it and add a right one again.
+
+    - **Delete**: If you want to delete any of the data, click Delete in '🔀 Repository'.
+            
+    - **Download**: You can download the articles you added by clicking Download in '🔀 Repository'.
     '''
 )
 
@@ -82,7 +92,7 @@ for file_name in os.listdir("data"):
     if file_name.endswith(".txt"):
         with st.expander(f"##### {file_name}"):
             # Use st.beta_columns to create two columns
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             
             # Button in the first column
             if col1.button(f"Read {file_name}"):
@@ -91,3 +101,7 @@ for file_name in os.listdir("data"):
             # Button in the second column
             if col2.button(f"Delete {file_name}"):
                 delete_file(file_name)
+
+            # Button in the third column
+            if col3.button(f"Download {file_name}"):
+                download_file(file_name)
