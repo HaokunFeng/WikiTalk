@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-leagues_docs = {}
 
 # initialize wiki_titles
 if "wiki_titles" not in st.session_state:
@@ -28,14 +27,16 @@ if "wiki_titles" not in st.session_state:
 # access and modify wiki_titles
 wiki_titles = st.session_state.wiki_state["wiki_titles"]
 
-# load data for each wiki title
-for wiki_title in wiki_titles:
-    leagues_docs[wiki_title] = SimpleDirectoryReader(
-        input_files=[f"data/{wiki_title}.txt"]
-    ).load_data()
+
 
 # function to build vector and summary indices
 def build_indices(wiki_titles, node_parser, agents, query_engines):
+    leagues_docs = {}
+    # load data for each wiki title
+    for wiki_title in wiki_titles:
+        leagues_docs[wiki_title] = SimpleDirectoryReader(
+            input_files=[f"data/{wiki_title}.txt"]
+        ).load_data()
     all_nodes = []
     for idx, wiki_title in enumerate(wiki_titles):
         nodes = node_parser.get_nodes_from_documents(leagues_docs[wiki_title])
