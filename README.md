@@ -13,6 +13,7 @@ Our system uses the power of GPT-3.5-Turbo and real_time Wikipedia to provide yo
 ## Demo App 👏
 [**WikiTalk**](https://wikitalk.azurewebsites.net)
 
+
 ## Features of the App 🎯
 - **WikiTalk**:  You can ask questions and get accurate information based on Wikipedia here. Before using this function, you need to add the related data using 'Knowledge Base' function, otherwise you will get the feedback from chatGPT-3.5 directly that might be wrong. And it might take 1-2minutes to get the feedback because it will search all the relevant information in your knowledge base.
 - **Knowledge Base**:  Here you can add the related data to the knowledge base to build your own library. Using search, add, read and delete to modify your library.
@@ -44,6 +45,10 @@ You can get your own OpenAI API key by following the following instructions:
 
 # Technologies Usesd 🤖
 Llama-Index, Streamlit, OpenAI API, WikiPedia API
+
+
+## Demo Video 📹
+[**How to use WikiTalk**](https://drive.google.com/file/d/1-mrjlC7sbf8rBmyM7VzS8nG493Yssf8i/view?usp=sharing)
 
 
 ## Privacy 📂
