@@ -18,6 +18,7 @@ st.set_page_config(
     menu_items=None,
 )
 st.title("📂 Chat with File")
+st.caption("Upload a PDF file first and ask questions about the file.")
 st.markdown("---")
 
 # set api key and model
