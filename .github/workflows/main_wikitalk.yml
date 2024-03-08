@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'wikitalk'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F1A52FDE65344CF1899A3886FBB23403 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_752A53F08149472882B54348A259BA04 }}
