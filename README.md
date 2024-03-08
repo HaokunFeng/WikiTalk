@@ -25,7 +25,7 @@ Our system uses the power of GPT-3.5-Turbo and real_time Wikipedia to provide yo
 To use this program in your local environment, follow these simple steps:
 
 - Clone this repository.
-- ``python -m venv vent``
+- ``python -m venv venv``
 - ``.\venv\Scripts\Activate`` (Or use a proper command based on your OS to activate the environment)
 - ``pip install -r requirements.txt``
 - Replace the .env.apikey with your own OpenAI API Key
